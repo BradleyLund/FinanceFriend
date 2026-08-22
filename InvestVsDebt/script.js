@@ -117,43 +117,81 @@
     };
   }
 
+  // The minimum constant monthly payment that clears `debt0` by exactly
+  // `months` months, at monthly rate `r` (standard loan amortization
+  // formula, solved for payment). Rounded up a cent so the discrete
+  // month-by-month simulation actually reaches zero (floating point
+  // drift can otherwise leave a fraction of a cent outstanding, which
+  // just barely misses the target month).
+  function minPaymentToClear(debt0, r, months) {
+    if (debt0 <= 0) return 0;
+    if (months <= 0) return Infinity;
+    var minP;
+    if (r === 0) {
+      minP = debt0 / months;
+    } else {
+      var factor = Math.pow(1 + r, months);
+      minP = (debt0 * r * factor) / (factor - 1);
+    }
+    return Math.ceil(minP * 100) / 100 + 0.01;
+  }
+
   // Searches how a fixed monthly budget should split between debt payment
   // and investment contribution to maximize net worth at the chosen horizon.
-  // Debt and investments compound independently of each other, so net worth
-  // is (near-enough) a single-peaked function of the split — a coarse-then-fine
-  // grid search over computeSeries finds the peak without assuming a formula,
-  // and stays exactly consistent with what the chart itself shows.
+  //
+  // Net worth is NOT a smooth function of the split: whatever payment you
+  // pick determines, in whole months, exactly when the debt clears and the
+  // "redirect into investing" rollover kicks in — and that month can jump
+  // by a whole step from a payment just one dollar higher or lower. A
+  // continuous grid search can straddle that cliff and land on the wrong
+  // side of it. So instead of guessing payment amounts, this enumerates
+  // every possible payoff month directly (1 to the full horizon), computes
+  // the exact minimum payment that clears the debt by that month (paying
+  // any more than that during the payoff phase only starves investing
+  // without clearing debt any sooner), and evaluates net worth for each —
+  // plus the two corners (never pay it down / pay the maximum possible).
+  // That set provably contains the true best constant-payment strategy.
   function findOptimalSplit(inputs, budget) {
-    function netWorthFor(debtPayment) {
+    var monthlyDebtRate = inputs.debtRate / 100 / 12;
+    var totalMonths = inputs.years * 12;
+
+    function seriesFor(debtPayment) {
       var trial = Object.assign({}, inputs, {
         debtPayment: debtPayment,
         investContribution: budget - debtPayment
       });
-      return computeSeries(trial).finalNet;
+      return computeSeries(trial);
+    }
+
+    var candidates = [0, budget];
+    for (var m = 1; m <= totalMonths; m++) {
+      var minP = minPaymentToClear(inputs.debtBalance, monthlyDebtRate, m);
+      if (isFinite(minP) && minP >= 0 && minP <= budget) {
+        candidates.push(minP);
+      }
     }
 
     var bestP = 0;
-    var bestNet = -Infinity;
-    var coarseSteps = 240;
-    for (var i = 0; i <= coarseSteps; i++) {
-      var p = (budget * i) / coarseSteps;
-      var net = netWorthFor(p);
-      if (net > bestNet) { bestNet = net; bestP = p; }
+    var bestSeries = seriesFor(0);
+    var bestNet = bestSeries.finalNet;
+    for (var i = 0; i < candidates.length; i++) {
+      var series = seriesFor(candidates[i]);
+      if (series.finalNet > bestNet) {
+        bestNet = series.finalNet;
+        bestP = candidates[i];
+        bestSeries = series;
+      }
     }
 
-    var radius = budget / coarseSteps;
-    var fineSteps = 40;
-    for (var j = -fineSteps; j <= fineSteps; j++) {
-      var pf = Math.min(budget, Math.max(0, bestP + (radius * j) / fineSteps));
-      var netf = netWorthFor(pf);
-      if (netf > bestNet) { bestNet = netf; bestP = pf; }
-    }
-
-    bestP = Math.round(bestP);
+    // Round up, never down: rounding a minimum-to-clear payment down by even
+    // a cent can drop it back below the threshold and reopen the same cliff.
+    bestP = Math.min(budget, Math.ceil(bestP));
+    var finalSeries = seriesFor(bestP);
     return {
       debtPayment: bestP,
       investContribution: Math.max(0, budget - bestP),
-      finalNet: netWorthFor(bestP)
+      finalNet: finalSeries.finalNet,
+      debtFreeMonth: finalSeries.debtFreeMonth
     };
   }
 
@@ -178,10 +216,20 @@
     var leavesDebtUnserviced = inputs.debtBalance > 0 && optimal.debtPayment <= initialInterest && optimal.debtPayment < optimal.investContribution;
 
     var nearAllThreshold = budget * 0.03;
+    var investingWinsOnRate = inputs.investRate > inputs.debtRate;
+    var payoffEarlyBonus = investingWinsOnRate && optimal.debtPayment > 0 &&
+      optimal.investContribution > 0 && optimal.debtFreeMonth !== null;
+
     var favor;
-    if (optimal.investContribution >= budget - nearAllThreshold) favor = 'investing beats the loan’s rate';
-    else if (optimal.debtPayment >= budget - nearAllThreshold) favor = 'the loan’s rate beats investing';
-    else favor = 'the rates are close enough that a mixed split wins';
+    if (payoffEarlyBonus) {
+      favor = 'investing’s rate is higher, but clearing the loan early costs almost nothing here and permanently removes it as a drag on your net worth — worth doing before the rest goes to investing';
+    } else if (optimal.investContribution >= budget - nearAllThreshold) {
+      favor = 'investing beats the loan’s rate';
+    } else if (optimal.debtPayment >= budget - nearAllThreshold) {
+      favor = 'the loan’s rate beats investing';
+    } else {
+      favor = 'the rates are close enough that a mixed split wins';
+    }
 
     var delta = optimal.finalNet - before;
     var deltaText = delta >= 0
@@ -194,6 +242,8 @@
 
     if (leavesDebtUnserviced) {
       msg += ' Note: that leaves the loan’s interest uncovered, so its balance grows for the whole horizon — real loans usually require a minimum payment this ignores.';
+    } else if (payoffEarlyBonus) {
+      msg += ' Uncheck “redirect its payment into investing” above to see the plain answer (all to investing) if you\'d rather ignore that early-payoff edge.';
     }
 
     els.maximizeResult.innerHTML = msg;
