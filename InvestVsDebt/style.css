@@ -136,6 +136,74 @@
   border: none;
 }
 
+/* -- maximize net worth -- */
+.maximize-btn {
+  display: block;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.maximize-btn:hover {
+  background: var(--ink-2);
+}
+
+.maximize-btn:active {
+  transform: translateY(1px);
+}
+
+.maximize-caption {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-on-paper-dim);
+  margin: 0.65rem 0 0;
+}
+
+.maximize-caption #maximize-budget,
+.maximize-caption #maximize-years {
+  font-family: var(--font-mono);
+  color: var(--text-on-paper);
+}
+
+.maximize-result {
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--text-on-paper);
+  background: rgba(31, 111, 92, 0.12);
+  border-left: 2px solid var(--growth);
+  padding: 0.65rem 0.7rem;
+  margin: 0.75rem 0 0;
+}
+
+.maximize-result--warn {
+  background: rgba(154, 59, 52, 0.1);
+  border-left-color: var(--debt);
+}
+
+.maximize-result strong {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes field-flash {
+  0% { background: rgba(176, 141, 70, 0.35); }
+  100% { background: transparent; }
+}
+
+.field-input-row.flash {
+  animation: field-flash 900ms ease-out;
+}
+
 /* -- result panel -- */
 .result-panel {
   display: flex;

@@ -104,6 +104,16 @@
         <input type="range" id="years" min="1" max="40" step="1" value="10" class="slider" />
       </div>
 
+      <hr class="hairline" />
+
+      <button type="button" class="maximize-btn" id="maximize-btn">Maximize net worth</button>
+      <p class="maximize-caption">
+        Keeps your $<span id="maximize-budget">800</span>/mo total the same, but finds the
+        split between debt and investing that leaves you with the most at year
+        <span id="maximize-years">10</span>.
+      </p>
+      <p class="maximize-result" id="maximize-result" hidden></p>
+
     </form>
 
     <section class="result-panel">

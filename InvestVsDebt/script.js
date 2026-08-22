@@ -12,6 +12,10 @@
     rollOver: document.getElementById('roll-over'),
     years: document.getElementById('years'),
     yearsValue: document.getElementById('years-value'),
+    maximizeBtn: document.getElementById('maximize-btn'),
+    maximizeBudget: document.getElementById('maximize-budget'),
+    maximizeYears: document.getElementById('maximize-years'),
+    maximizeResult: document.getElementById('maximize-result'),
     summaryYears: document.getElementById('summary-years'),
     summaryNetworth: document.getElementById('summary-networth'),
     summaryDebtfree: document.getElementById('summary-debtfree'),
@@ -111,6 +115,99 @@
       warning: warning,
       years: inputs.years
     };
+  }
+
+  // Searches how a fixed monthly budget should split between debt payment
+  // and investment contribution to maximize net worth at the chosen horizon.
+  // Debt and investments compound independently of each other, so net worth
+  // is (near-enough) a single-peaked function of the split — a coarse-then-fine
+  // grid search over computeSeries finds the peak without assuming a formula,
+  // and stays exactly consistent with what the chart itself shows.
+  function findOptimalSplit(inputs, budget) {
+    function netWorthFor(debtPayment) {
+      var trial = Object.assign({}, inputs, {
+        debtPayment: debtPayment,
+        investContribution: budget - debtPayment
+      });
+      return computeSeries(trial).finalNet;
+    }
+
+    var bestP = 0;
+    var bestNet = -Infinity;
+    var coarseSteps = 240;
+    for (var i = 0; i <= coarseSteps; i++) {
+      var p = (budget * i) / coarseSteps;
+      var net = netWorthFor(p);
+      if (net > bestNet) { bestNet = net; bestP = p; }
+    }
+
+    var radius = budget / coarseSteps;
+    var fineSteps = 40;
+    for (var j = -fineSteps; j <= fineSteps; j++) {
+      var pf = Math.min(budget, Math.max(0, bestP + (radius * j) / fineSteps));
+      var netf = netWorthFor(pf);
+      if (netf > bestNet) { bestNet = netf; bestP = pf; }
+    }
+
+    bestP = Math.round(bestP);
+    return {
+      debtPayment: bestP,
+      investContribution: Math.max(0, budget - bestP),
+      finalNet: netWorthFor(bestP)
+    };
+  }
+
+  function runMaximize() {
+    var inputs = readInputs();
+    var budget = inputs.debtPayment + inputs.investContribution;
+    if (budget <= 0) {
+      els.maximizeResult.textContent = 'Enter a monthly payment or contribution first — there’s nothing to split yet.';
+      els.maximizeResult.hidden = false;
+      els.maximizeResult.classList.add('maximize-result--warn');
+      return;
+    }
+
+    var before = computeSeries(inputs).finalNet;
+    var optimal = findOptimalSplit(inputs, budget);
+
+    els.debtPayment.value = optimal.debtPayment;
+    els.investContribution.value = optimal.investContribution;
+
+    var monthlyDebtRate = inputs.debtRate / 100 / 12;
+    var initialInterest = inputs.debtBalance * monthlyDebtRate;
+    var leavesDebtUnserviced = inputs.debtBalance > 0 && optimal.debtPayment <= initialInterest && optimal.debtPayment < optimal.investContribution;
+
+    var nearAllThreshold = budget * 0.03;
+    var favor;
+    if (optimal.investContribution >= budget - nearAllThreshold) favor = 'investing beats the loan’s rate';
+    else if (optimal.debtPayment >= budget - nearAllThreshold) favor = 'the loan’s rate beats investing';
+    else favor = 'the rates are close enough that a mixed split wins';
+
+    var delta = optimal.finalNet - before;
+    var deltaText = delta >= 0
+      ? 'up ' + currency.format(delta) + ' from the current split'
+      : currency.format(Math.abs(delta)) + ' lower than the current split (already close to optimal)';
+
+    var msg = '$' + optimal.debtPayment + '/mo to debt, $' + optimal.investContribution +
+      '/mo to investing — ' + favor + '. Projected net worth: <strong>' +
+      currency.format(optimal.finalNet) + '</strong> (' + deltaText + ').';
+
+    if (leavesDebtUnserviced) {
+      msg += ' Note: that leaves the loan’s interest uncovered, so its balance grows for the whole horizon — real loans usually require a minimum payment this ignores.';
+    }
+
+    els.maximizeResult.innerHTML = msg;
+    els.maximizeResult.hidden = false;
+    els.maximizeResult.classList.toggle('maximize-result--warn', leavesDebtUnserviced);
+
+    [els.debtPayment, els.investContribution].forEach(function (input) {
+      var row = input.closest('.field-input-row');
+      row.classList.remove('flash');
+      void row.offsetWidth;
+      row.classList.add('flash');
+    });
+
+    render();
   }
 
   function formatDebtFree(m) {
@@ -300,12 +397,21 @@
     els.summaryDebtfree.textContent = formatDebtFree(result.debtFreeMonth);
     els.summaryInterest.textContent = currency.format(result.totalInterest);
     els.summaryGrowth.textContent = currency.format(result.growthEarned);
+
+    els.maximizeBudget.textContent = inputs.debtPayment + inputs.investContribution;
+    els.maximizeYears.textContent = inputs.years;
   }
 
   els.years.addEventListener('input', function () {
     els.yearsValue.textContent = els.years.value;
   });
 
-  els.form.addEventListener('input', render);
+  els.form.addEventListener('input', function () {
+    els.maximizeResult.hidden = true;
+    render();
+  });
+
+  els.maximizeBtn.addEventListener('click', runMaximize);
+
   render();
 })();
