@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Invest vs. Debt — Finance Friend</title>
+<meta name="description" content="Split a monthly payment between paying down debt and investing, and see your projected net worth over time." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%23b08d46%22/></svg>" />
+<link rel="stylesheet" href="../assets/css/shared.css" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="ff-header">
+  <a class="ff-back" href="../index.html">← Finance Friend</a>
+  <span class="ff-header-tag">01 — Invest vs. Debt</span>
+</header>
+
+<main class="tool">
+  <div class="tool-intro">
+    <h1>Invest vs. Debt</h1>
+    <p>
+      Every month you send money toward a loan and toward investments.
+      This shows what that split is worth, year by year — and the point
+      your net worth crosses back to zero.
+    </p>
+  </div>
+
+  <div class="tool-grid">
+
+    <form class="ledger-panel input-panel" id="calc-form">
+
+      <div class="group-heading group--debt">
+        <span class="dot"></span> Debt
+      </div>
+
+      <div class="field">
+        <label for="debt-balance">Loan balance</label>
+        <div class="field-input-row">
+          <span class="prefix">$</span>
+          <input type="number" id="debt-balance" inputmode="decimal" min="0" step="100" value="20000" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="debt-rate">Interest rate (APR)</label>
+        <div class="field-input-row">
+          <input type="number" id="debt-rate" inputmode="decimal" min="0" max="100" step="0.1" value="6.5" />
+          <span class="suffix">%</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="debt-payment">Monthly payment</label>
+        <div class="field-input-row">
+          <span class="prefix">$</span>
+          <input type="number" id="debt-payment" inputmode="decimal" min="0" step="10" value="400" />
+        </div>
+      </div>
+
+      <p class="field-warning" id="debt-warning" hidden>
+        This payment doesn't cover the monthly interest — the balance will grow instead of shrink.
+      </p>
+
+      <hr class="hairline" />
+
+      <div class="group-heading group--growth">
+        <span class="dot"></span> Investments
+      </div>
+
+      <div class="field">
+        <label for="invest-balance">Starting balance</label>
+        <div class="field-input-row">
+          <span class="prefix">$</span>
+          <input type="number" id="invest-balance" inputmode="decimal" min="0" step="100" value="5000" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="invest-rate">Expected growth rate</label>
+        <div class="field-input-row">
+          <input type="number" id="invest-rate" inputmode="decimal" min="0" max="100" step="0.1" value="7" />
+          <span class="suffix">%</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="invest-contribution">Monthly contribution</label>
+        <div class="field-input-row">
+          <span class="prefix">$</span>
+          <input type="number" id="invest-contribution" inputmode="decimal" min="0" step="10" value="400" />
+        </div>
+      </div>
+
+      <label class="checkbox-row" for="roll-over">
+        <input type="checkbox" id="roll-over" checked />
+        <span>Once debt is paid off, redirect its payment into investing</span>
+      </label>
+
+      <hr class="hairline" />
+
+      <div class="field field--years">
+        <label for="years">Time horizon — <span id="years-value">10</span> years</label>
+        <input type="range" id="years" min="1" max="40" step="1" value="10" class="slider" />
+      </div>
+
+    </form>
+
+    <section class="result-panel">
+      <div class="chart-wrap ledger-panel">
+        <div class="chart-canvas-holder">
+          <canvas id="chart" role="img" aria-label="Line chart of debt balance, investment balance, and net worth over time"></canvas>
+        </div>
+      </div>
+
+      <div class="summary-row ledger-panel" id="summary">
+        <div class="summary-cell">
+          <span class="summary-label">Net worth, year <span id="summary-years">10</span></span>
+          <span class="summary-value" id="summary-networth">$0</span>
+        </div>
+        <div class="summary-cell">
+          <span class="summary-label">Debt-free</span>
+          <span class="summary-value" id="summary-debtfree">—</span>
+        </div>
+        <div class="summary-cell">
+          <span class="summary-label">Interest paid</span>
+          <span class="summary-value summary-value--debt" id="summary-interest">$0</span>
+        </div>
+        <div class="summary-cell">
+          <span class="summary-label">Investment growth</span>
+          <span class="summary-value summary-value--growth" id="summary-growth">$0</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="ff-footer">Finance Friend — figures are estimates, not advice. Assumes fixed rates and consistent payments.</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+/* ==========================================================================
+   Finance Friend — shared tokens & ledger design system
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* -- color: ink (dark, primary ground) -- */
+  --ink: #10192a;
+  --ink-2: #182238;
+  --ink-3: #1f2c47;
+
+  /* -- color: paper (ledger surface) -- */
+  --paper: #f2ecdd;
+  --paper-2: #e8e0cc;
+
+  /* -- color: text -- */
+  --text-on-ink: #ede6d6;
+  --text-on-ink-dim: #a49b86;
+  --text-on-paper: #1b2430;
+  --text-on-paper-dim: #6b6552;
+
+  /* -- color: semantic (debt / growth / net) -- */
+  --debt: #9a3b34;
+  --debt-soft: #c2695f;
+  --growth: #1f6f5c;
+  --growth-soft: #4c9a87;
+  --brass: #b08d46;
+  --brass-bright: #d4af6a;
+
+  /* -- type -- */
+  --font-display: 'Fraunces', 'Iowan Old Style', ui-serif, serif;
+  --font-body: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  --radius: 3px;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--text-on-ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-on-ink);
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: var(--brass);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--brass-bright);
+  outline-offset: 2px;
+}
+
+/* -- shared header -- */
+.ff-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem clamp(1.25rem, 4vw, 3rem);
+  border-bottom: 1px solid var(--ink-3);
+}
+
+.ff-wordmark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  color: var(--text-on-ink);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.ff-wordmark::before {
+  content: '';
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  background: var(--brass);
+  border-radius: 50%;
+  transform: translateY(-0.05em);
+}
+
+.ff-header-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-on-ink-dim);
+}
+
+.ff-back {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text-on-ink-dim);
+  transition: color 0.15s ease;
+}
+
+.ff-back:hover { color: var(--brass-bright); }
+
+/* -- ledger panel: the recurring "paper" surface -- */
+.ledger-panel {
+  background: var(--paper);
+  color: var(--text-on-paper);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25), 0 12px 32px -18px rgba(0, 0, 0, 0.55);
+}
+
+.hairline {
+  border: none;
+  border-top: 1px solid var(--ink-3);
+  margin: 0;
+}
+
+.hairline--brass {
+  border-top: 1px solid var(--brass);
+  opacity: 0.55;
+}
+
+/* -- shared footer -- */
+.ff-footer {
+  padding: 2.5rem clamp(1.25rem, 4vw, 3rem) 3rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--text-on-ink-dim);
+  text-transform: uppercase;
+}
+
+/* -- form field primitives shared by tools -- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.field label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-on-paper-dim);
+}
+
+.field .field-input-row {
+  display: flex;
+  align-items: center;
+  border-bottom: 1.5px solid var(--text-on-paper);
+  padding-bottom: 0.25rem;
+  transition: border-color 0.15s ease;
+}
+
+.field .field-input-row:focus-within {
+  border-color: var(--brass);
+}
+
+.field .prefix,
+.field .suffix {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--text-on-paper-dim);
+}
+
+.field input[type='number'],
+.field input[type='text'] {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-paper);
+  padding: 0.15rem 0.35rem;
+  min-width: 0;
+}
+
+.field input:focus {
+  outline: none;
+}
+
+.field input[type='number']::-webkit-outer-spin-button,
+.field input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.field input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.group-heading {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid currentColor;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.group-heading .dot {
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.group--debt { color: var(--debt); }
+.group--growth { color: var(--growth); }

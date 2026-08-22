@@ -1,0 +1,117 @@
+.hub {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 8vw, 5.5rem) clamp(1.25rem, 4vw, 2rem) 4rem;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brass-bright);
+  margin: 0 0 1.25rem;
+}
+
+.hero-title {
+  font-size: clamp(2.4rem, 6.5vw, 4.1rem);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+  max-width: 14ch;
+}
+
+.hero-sub {
+  margin: 1.5rem 0 0;
+  max-width: 46ch;
+  color: var(--text-on-ink-dim);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.ledger-index {
+  margin-top: clamp(3rem, 8vw, 5rem);
+}
+
+.ledger-index-heading h2 {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--text-on-ink-dim);
+  margin-bottom: 0.75rem;
+}
+
+.ledger-index-heading .hairline--brass {
+  margin-bottom: 0.5rem;
+}
+
+.ledger-entry {
+  display: grid;
+  grid-template-columns: 2.75rem 1fr auto;
+  align-items: start;
+  gap: 1.25rem;
+  padding: 1.6rem 0.25rem;
+  text-decoration: none;
+  color: var(--text-on-ink);
+  transition: background 0.18s ease;
+  border-radius: var(--radius);
+}
+
+.ledger-entry:hover {
+  background: var(--ink-2);
+}
+
+.entry-no {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--brass-bright);
+  padding-top: 0.2rem;
+}
+
+.entry-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.entry-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.entry-desc {
+  color: var(--text-on-ink-dim);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  max-width: 46ch;
+}
+
+.entry-status {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-on-ink-dim);
+  padding-top: 0.3rem;
+  white-space: nowrap;
+}
+
+.entry-status--open {
+  color: var(--growth-soft);
+}
+
+.ledger-entry--soon {
+  cursor: default;
+}
+
+.ledger-entry--soon .entry-title,
+.ledger-entry--soon .entry-desc {
+  opacity: 0.62;
+}
+
+.ledger-entry--soon:hover {
+  background: none;
+}

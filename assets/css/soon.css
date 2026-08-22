@@ -1,0 +1,51 @@
+.soon {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: clamp(3.5rem, 12vw, 7rem) clamp(1.25rem, 4vw, 2rem) 5rem;
+}
+
+.soon-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brass-bright);
+  margin: 0 0 1.25rem;
+}
+
+.soon h1 {
+  font-size: clamp(2rem, 5.5vw, 3rem);
+  line-height: 1.08;
+  font-weight: 600;
+}
+
+.soon-sub {
+  margin: 1.5rem 0 2.25rem;
+  max-width: 52ch;
+  color: var(--text-on-ink-dim);
+  font-size: 1.02rem;
+  line-height: 1.65;
+}
+
+.soon-sub a {
+  color: var(--growth-soft);
+  text-decoration-color: currentColor;
+}
+
+.soon-cta {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--brass-bright);
+  padding: 0.85rem 1.4rem;
+  border-radius: var(--radius);
+  transition: background 0.15s ease;
+}
+
+.soon-cta:hover {
+  background: var(--brass);
+}
